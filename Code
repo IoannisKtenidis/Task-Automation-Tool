@@ -1,0 +1,47 @@
+import pandas as pd
+
+# Read data from a file
+data = pd.read_csv('sales_data.csv')
+
+# Perform data analysis (e.g., total sales by region)
+report_data = data.groupby('region')['sales'].sum()
+
+# Save the report to a new CSV or Excel file
+report_data.to_csv('sales_report.csv')
+
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+
+# Set up email details
+email_sender = 'youremail@example.com'
+email_receiver = 'recipient@example.com'
+subject = 'Automated Sales Report'
+
+# Create the email object
+msg = MIMEMultipart()
+msg['From'] = email_sender
+msg['To'] = email_receiver
+msg['Subject'] = subject
+
+# Attach body text
+body = 'Please find the attached sales report.'
+msg.attach(MIMEText(body, 'plain'))
+
+# Attach the report file
+filename = 'sales_report.csv'
+attachment = open(filename, 'rb')
+part = MIMEBase('application', 'octet-stream')
+part.set_payload(attachment.read())
+encoders.encode_base64(part)
+part.add_header('Content-Disposition', f'attachment; filename={filename}')
+msg.attach(part)
+
+# Send the email
+server = smtplib.SMTP('smtp.example.com', 587)
+server.starttls()
+server.login(email_sender, 'yourpassword')
+server.sendmail(email_sender, email_receiver, msg.as_string())
+server.quit()
